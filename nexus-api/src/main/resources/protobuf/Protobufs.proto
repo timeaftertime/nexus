@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package cn.milai.nexus;
+
+message MsgCarrier {
+	string id = 1;  // 消息唯一标识
+	int32 code = 2;  // 消息类型 code
+	int64 time = 3;  // 消息发送时间
+	string data = 4;  // 消息数据
+}
