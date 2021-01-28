@@ -1,0 +1,11 @@
+*.java                  text
+*.xml                   text
+*.factories             text
+*.proerties             text
+*.yml                   text
+
+.gitignore              text
+.gitattributes          text
+LICENSE                 text
+README.md               text
+
