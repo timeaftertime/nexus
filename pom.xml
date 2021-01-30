@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cn.milai</groupId>
 	<artifactId>nexus</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>pom</packaging>
 	<name>nexus</name>
 	<description>基于 SpringBoot 、 Netty 的 Socket 客户端与服务端框架</description>
@@ -15,10 +15,23 @@
 	</parent>
 
 	<properties>
-		<beginning.version>0.0.1-SNAPSHOT</beginning.version>
-		<nexus.version>0.0.1-SNAPSHOT</nexus.version>
+		<beginning.version>0.0.1</beginning.version>
+		<nexus.version>0.0.1</nexus.version>
 		<protobuf.version>3.14.0</protobuf.version>
 	</properties>
+
+	<build>
+		<plugins>
+			<!-- 批量更新子模块版本号：mvn -N versions:update-child-modules   -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<configuration>
+					<generateBackupPoms>false</generateBackupPoms>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 	<modules>
 		<module>nexus-api</module>
