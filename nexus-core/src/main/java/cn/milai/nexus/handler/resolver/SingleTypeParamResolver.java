@@ -2,7 +2,7 @@ package cn.milai.nexus.handler.resolver;
 
 import org.springframework.core.MethodParameter;
 
-import cn.milai.common.util.Classes;
+import cn.milai.common.base.Classes;
 import cn.milai.nexus.handler.Msg;
 import io.netty.channel.ChannelHandlerContext;
 

@@ -3,8 +3,8 @@ package cn.milai.nexus.handler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.milai.common.util.Digests;
-import cn.milai.common.util.Randoms;
+import cn.milai.common.base.Digests;
+import cn.milai.common.base.Randoms;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
