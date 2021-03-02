@@ -69,7 +69,7 @@ public class Msg {
 	}
 
 	private static String generateId() {
-		return Digests.sha256(System.nanoTime() + Randoms.randLowerOrDigit(8)).substring(0, ID_LENGTH);
+		return Digests.sha256(System.nanoTime() + Randoms.fixedLowerDigit(8)).substring(0, ID_LENGTH);
 	}
 
 	public String getId() {
