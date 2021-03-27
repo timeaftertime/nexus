@@ -2,19 +2,19 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>cn.milai</groupId>
-		<artifactId>nexus</artifactId>
+		<groupId>cn.milai.nexus</groupId>
+		<artifactId>nexus-parent</artifactId>
 		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>nexus-core</artifactId>
 
 	<dependencies>
 		<dependency>
-			<groupId>cn.milai</groupId>
+			<groupId>cn.milai.beginning</groupId>
 			<artifactId>beginning-base</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>cn.milai</groupId>
+			<groupId>cn.milai.nexus</groupId>
 			<artifactId>nexus-api</artifactId>
 		</dependency>
 		<dependency>
