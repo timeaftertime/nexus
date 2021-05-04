@@ -5,19 +5,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * 消息处理器（方法）
- * @author milai
- * @date 2021.01.01
- */
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MsgMapping {
+import org.springframework.stereotype.Component;
 
-	/**
-	 * 消息处理方法所处理的 code 值
-	 * @return
-	 */
-	int[] value();
+/**
+ * 使当前类中声明的 {@link MsgExceptionHandler} 生效 
+ * @author milai
+ * @date 2021.05.03
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Component
+public @interface MsgControllerAdvice {
 
 }

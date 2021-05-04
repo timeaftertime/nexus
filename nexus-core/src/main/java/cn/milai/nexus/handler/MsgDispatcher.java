@@ -2,24 +2,27 @@ package cn.milai.nexus.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.stereotype.Component;
 
-import cn.milai.nexus.NexusException;
 import cn.milai.nexus.annotation.MsgController;
+import cn.milai.nexus.annotation.MsgControllerAdvice;
+import cn.milai.nexus.annotation.MsgExceptionHandler;
 import cn.milai.nexus.annotation.MsgMapping;
-import cn.milai.nexus.handler.resolver.ParamResolver;
+import cn.milai.nexus.handler.paramresolve.ParamResolver;
+import cn.milai.nexus.handler.paramresolve.ParamResolverComposite;
+import cn.milai.nexus.handler.paramresolve.ExceptionParamResolver;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -32,60 +35,145 @@ public class MsgDispatcher implements ApplicationContextAware {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MsgDispatcher.class);
 
-	private static final String CODE = "code";
+	private ApplicationContext applicationContext;
 
 	/**
 	 * 消息 code 及对应的处理方法的映射
 	 */
-	private Map<Integer, MsgHandler> handlerMapping = new HashMap<>();
+	private Map<Integer, MethodHandler> handlerMapping = new HashMap<>();
 
-	@Autowired
-	private ParamResolver paramResolver;
+	/**
+	 * {@link MsgController} 内定义的 {@link Throwable} 即其处理器 {@link MethodHandler}
+	 */
+	private Map<Object, Map<Class<Exception>, MethodHandler>> exceptionHandlers = new HashMap<>();
+
+	private Map<Class<Exception>, MethodHandler> globalExceptionHandlers = new HashMap<>();
 
 	/**
 	 * 分发消息到对应的处理器处理
 	 * @param msg
 	 */
-	void dispatch(ChannelHandlerContext ctx, Msg msg) throws NexusException {
+	void dispatch(ChannelHandlerContext ctx, Msg msg) throws Exception {
 		LOG.info("接收到消息, msg = {}", msg);
-		MsgHandler handler = handlerMapping.get(msg.getCode());
+		MethodHandler handler = handlerMapping.get(msg.getCode());
 		if (handler == null) {
 			LOG.warn("没有找到对应的处理器， code = {}, handlers = {}", msg.getCode(), handlerMapping.keySet());
 			return;
 		}
-		Object[] params = new Object[handler.getHandleMethod().getParameterCount()];
-		for (int i = 0; i < params.length; i++) {
-			params[i] = paramResolver.resolve(new MethodParameter(handler.getHandleMethod(), i), ctx, msg);
-		}
+		ParamResolverComposite paramResolver = new ParamResolverComposite(
+			applicationContext.getBeansOfType(ParamResolver.class).values()
+		);
+		Object[] params = paramResolver.resolveParams(handler.getHandleMethod(), ctx, msg);
 		try {
 			handler.invoke(params);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			LOG.error("调用消息处理器失败, msg = {}, e = {}", msg, ExceptionUtils.getStackFrames(e));
-			throw new NexusException(e);
+		} catch (InvocationTargetException ex) {
+			Exception e = (Exception) ex.getTargetException();
+			LOG.error("处理消息时发生异常: msg = {}, e = {}", msg, ExceptionUtils.getStackFrames(e));
+			MethodHandler exceptionHandler = findExceptionHandler(handler, e);
+			if (exceptionHandler == null) {
+				LOG.info("未找到对应的异常处理器: e = {}", e.getClass().getName());
+				throw e;
+			}
+			paramResolver.addParamResolver(new ExceptionParamResolver(e));
+			exceptionHandler.invoke(paramResolver.resolveParams(exceptionHandler.getHandleMethod(), ctx, msg));
 		}
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws MsgRedeclaredException {
-		Map<String, Object> msgHandlers = applicationContext.getBeansWithAnnotation(MsgController.class);
-		for (String name : msgHandlers.keySet()) {
-			Object msgHandler = msgHandlers.get(name);
-			for (Method method : msgHandler.getClass().getMethods()) {
-				MergedAnnotations annotations = MergedAnnotations.from(method);
-				MergedAnnotation<MsgMapping> handleMsg = annotations.get(MsgMapping.class);
-				if (!handleMsg.isPresent()) {
-					continue;
-				}
-				method.getParameters();
-				int[] codes = handleMsg.getIntArray(CODE);
-				for (int code : codes) {
-					MsgHandler pre = handlerMapping.get(code);
-					if (pre != null) {
-						throw new MsgRedeclaredException(code, pre.getHandleMethod(), method);
-					}
-					handlerMapping.put(code, new MsgHandler(msgHandler, method));
-				}
+	private MethodHandler findExceptionHandler(MethodHandler handler, Exception e) {
+		MethodHandler controllerExceptionHandler = findExceptionHandlerIn(
+			exceptionHandlers.getOrDefault(
+				handler.getHandler(), Collections.emptyMap()
+			), handler, e
+		);
+		if (controllerExceptionHandler != null) {
+			return controllerExceptionHandler;
+		}
+		return findExceptionHandlerIn(globalExceptionHandlers, controllerExceptionHandler, e);
+	}
+
+	private MethodHandler findExceptionHandlerIn(Map<Class<Exception>, MethodHandler> handlers, MethodHandler handler,
+		Exception e) {
+		Class<?> clazz = e.getClass();
+		while (clazz != Object.class) {
+			if (handlers.containsKey(clazz)) {
+				return handlers.get(clazz);
 			}
+			clazz = clazz.getSuperclass();
+		}
+		return null;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws HandlerRedeclareException {
+		this.applicationContext = applicationContext;
+		registerControllers(applicationContext.getBeansWithAnnotation(MsgController.class).values());
+		registerControllerAdvices(applicationContext.getBeansWithAnnotation(MsgControllerAdvice.class).values());
+	}
+
+	private void registerControllers(Collection<Object> controllers) throws ExceptionRemappingException {
+		for (Object controller : controllers) {
+			for (Method m : controller.getClass().getMethods()) {
+				parseMsgMapping(MergedAnnotations.from(m).get(MsgMapping.class), controller, m);
+				parseControllerExceptionHandler(
+					MergedAnnotations.from(m).get(MsgExceptionHandler.class), controller, m
+				);
+			}
+		}
+	}
+
+	private void registerControllerAdvices(Collection<Object> advices) {
+		for (Object advice : advices) {
+			for (Method m : advice.getClass().getMethods()) {
+				parseGlobalExceptionHandler(MergedAnnotations.from(m).get(MsgExceptionHandler.class), advice, m);
+			}
+		}
+	}
+
+	private void parseMsgMapping(MergedAnnotation<MsgMapping> annotation, Object handler, Method method) {
+		if (!annotation.isPresent()) {
+			return;
+		}
+		method.getParameters();
+		int[] codes = annotation.getIntArray(MergedAnnotation.VALUE);
+		for (int code : codes) {
+			MethodHandler pre = handlerMapping.get(code);
+			if (pre != null) {
+				throw new MsgRemappingException(code, pre.getHandleMethod(), method);
+			}
+			handlerMapping.put(code, new MethodHandler(handler, method));
+		}
+	}
+
+	private void parseControllerExceptionHandler(MergedAnnotation<MsgExceptionHandler> annotation, Object h, Method m) {
+		parseExceptionHandler(exceptionHandlers.get(h), annotation, h, m);
+	}
+
+	private void parseGlobalExceptionHandler(MergedAnnotation<MsgExceptionHandler> annotation, Object advice,
+		Method m) {
+		parseExceptionHandler(globalExceptionHandlers, annotation, advice, m);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void parseExceptionHandler(Map<Class<Exception>, MethodHandler> exceptionHandlers,
+		MergedAnnotation<MsgExceptionHandler> annotation, Object advice, Method method) {
+		if (!annotation.isPresent()) {
+			return;
+		}
+		registerThrowableHandler(
+			exceptionHandlers,
+			(Class<Exception>[]) annotation.getClassArray(MergedAnnotation.VALUE),
+			new MethodHandler(advice, method)
+		);
+	}
+
+	private void registerThrowableHandler(Map<Class<Exception>, MethodHandler> pres, Class<Exception>[] ex,
+		MethodHandler handler) {
+		for (Class<Exception> e : ex) {
+			MethodHandler pre = pres.get(e);
+			if (pre != null) {
+				throw new ExceptionRemappingException(e, pre.getHandleMethod(), handler.getHandleMethod());
+			}
+			pres.put(e, handler);
 		}
 	}
 

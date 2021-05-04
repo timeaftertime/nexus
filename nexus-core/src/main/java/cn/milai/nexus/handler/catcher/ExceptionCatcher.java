@@ -1,4 +1,4 @@
-package cn.milai.nexus.handler;
+package cn.milai.nexus.handler.catcher;
 
 import io.netty.channel.ChannelHandlerContext;
 
@@ -7,7 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
  * @author milai
  * @date 2021.01.14
  */
-public interface ExceptionHandler {
+public interface ExceptionCatcher {
 
 	/**
 	 * 处理给定 {@link ChannelHandlerContext} 发生的 {@link Throwable} 异常

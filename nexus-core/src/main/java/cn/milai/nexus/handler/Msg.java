@@ -44,6 +44,19 @@ public class Msg {
 	}
 
 	/**
+	 * 创建一个 {@link #data} 为指定 {key: value} 的 {@link Msg}
+	 * @param code
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Msg of(int code, String key, Object value) {
+		JSONObject data = new JSONObject();
+		data.put(key, value);
+		return new Msg(generateId(), code, System.currentTimeMillis() / 1000, data);
+	}
+
+	/**
 	 * 构造指定 code 和 data 的 Msg 并写入指定 {@link ChannelHandlerContext}
 	 * @param ctx
 	 * @param code
@@ -72,21 +85,13 @@ public class Msg {
 		return Digests.sha256(System.nanoTime() + Randoms.fixedLowerDigit(8)).substring(0, ID_LENGTH);
 	}
 
-	public String getId() {
-		return id;
-	}
+	public String getId() { return id; }
 
-	public int getCode() {
-		return code;
-	}
+	public int getCode() { return code; }
 
-	public long getTime() {
-		return time;
-	}
+	public long getTime() { return time; }
 
-	public JSONObject getData() {
-		return data;
-	}
+	public JSONObject getData() { return data; }
 
 	@Override
 	public String toString() {

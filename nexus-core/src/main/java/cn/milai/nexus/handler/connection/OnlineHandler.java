@@ -1,4 +1,4 @@
-package cn.milai.nexus.handler;
+package cn.milai.nexus.handler.connection;
 
 import io.netty.channel.ChannelHandlerContext;
 

@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import cn.milai.nexus.handler.catcher.ExceptionCatcher;
+import cn.milai.nexus.handler.connection.OnlineHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -22,7 +24,7 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<Msg> {
 	@Autowired
 	private MsgDispatcher msgDispatcher;
 	@Autowired
-	private ExceptionHandler exceptionHandler;
+	private ExceptionCatcher exceptionHandler;
 	@Autowired
 	private OnlineHandler onlines;
 

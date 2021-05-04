@@ -1,4 +1,4 @@
-package cn.milai.nexus.handler.resolver;
+package cn.milai.nexus.handler.paramresolve;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import cn.milai.nexus.handler.Msg;
 import io.netty.channel.ChannelHandlerContext;
@@ -18,6 +20,8 @@ import io.netty.channel.ChannelHandlerContext;
  * @author milai
  * @date 2021.01.02
  */
+@Order(2)
+@Component
 public class ModelAttrParamResolver extends AbstractParamResolver {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ModelAttrParamResolver.class);

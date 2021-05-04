@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Lazy;
 import cn.milai.nexus.codec.MsgCarrierCodec;
 import cn.milai.nexus.codec.MsgToCarrierCodec;
 import cn.milai.nexus.conf.NexusConf;
-import cn.milai.nexus.handler.BaseExceptionHandler;
 import cn.milai.nexus.handler.DispatcherHandler;
-import cn.milai.nexus.handler.ExceptionHandler;
-import cn.milai.nexus.handler.OnlineHandler;
+import cn.milai.nexus.handler.catcher.BaseExceptionCatcher;
+import cn.milai.nexus.handler.catcher.ExceptionCatcher;
+import cn.milai.nexus.handler.connection.OnlineHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -61,9 +61,9 @@ public class NexusConfig {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(ExceptionHandler.class)
-	public ExceptionHandler baseExceptionHandler() {
-		return new BaseExceptionHandler();
+	@ConditionalOnMissingBean(ExceptionCatcher.class)
+	public ExceptionCatcher baseExceptionCatcher() {
+		return new BaseExceptionCatcher();
 	}
 
 }

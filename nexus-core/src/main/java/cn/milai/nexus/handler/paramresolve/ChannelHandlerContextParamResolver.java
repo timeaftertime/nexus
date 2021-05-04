@@ -1,6 +1,8 @@
-package cn.milai.nexus.handler.resolver;
+package cn.milai.nexus.handler.paramresolve;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import cn.milai.nexus.handler.Msg;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,6 +12,8 @@ import io.netty.channel.ChannelHandlerContext;
  * @author milai
  * @date 2021.01.17
  */
+@Order(3)
+@Component
 public class ChannelHandlerContextParamResolver extends AbstractParamResolver {
 
 	@Override

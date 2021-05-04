@@ -4,11 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * 单个方法的消息处理器
+ * 持有单个方法的处理器
  * @author milai
  * @date 2021.01.03
  */
-public class MsgHandler {
+public class MethodHandler {
 
 	/**
 	 * 方法持有对象
@@ -20,7 +20,7 @@ public class MsgHandler {
 	 */
 	private Method handleMethod;
 
-	public MsgHandler(Object handler, Method handleMethod) {
+	public MethodHandler(Object handler, Method handleMethod) {
 		this.handler = handler;
 		this.handleMethod = handleMethod;
 	}
@@ -38,12 +38,8 @@ public class MsgHandler {
 		return handleMethod.invoke(handler, args);
 	}
 
-	public Object getHandler() {
-		return handler;
-	}
+	public Object getHandler() { return handler; }
 
-	public Method getHandleMethod() {
-		return handleMethod;
-	}
+	public Method getHandleMethod() { return handleMethod; }
 
 }

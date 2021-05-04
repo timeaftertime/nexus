@@ -1,6 +1,8 @@
-package cn.milai.nexus.handler.resolver;
+package cn.milai.nexus.handler.paramresolve;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import cn.milai.common.base.Classes;
 import cn.milai.nexus.handler.Msg;
@@ -11,6 +13,8 @@ import io.netty.channel.ChannelHandlerContext;
  * @author milai
  * @date 2021.01.02
  */
+@Order(1)
+@Component
 public class SingleTypeParamResolver extends AbstractParamResolver {
 
 	@Override
@@ -21,7 +25,7 @@ public class SingleTypeParamResolver extends AbstractParamResolver {
 	@Override
 	public Object doResolve(MethodParameter param, ChannelHandlerContext ctx, Msg msg) {
 		Class<?> c = param.getParameterType();
-		String paramName = param.getParameterName();
+		String paramName = param.getParameter().getName();
 		if (Classes.isInts(c)) {
 			return msg.getData().getInteger(paramName);
 		}

@@ -1,4 +1,4 @@
-package cn.milai.nexus.handler.resolver;
+package cn.milai.nexus.handler.paramresolve;
 
 import org.springframework.core.MethodParameter;
 
@@ -7,7 +7,7 @@ import cn.milai.nexus.util.Methods;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
- * 处理器参数解析器
+ * 处理器参数解析器，由于可能需要并发解析参数，必须实现为无状态的
  * @author milai
  * @date 2021.01.02
  */
@@ -35,7 +35,7 @@ public interface ParamResolver {
 	 * @return
 	 */
 	static String paramSignature(MethodParameter param) {
-		return String.format("%s(%s)", Methods.fullSignature(param.getMethod()), param.getParameterName());
+		return String.format("%s(%s)", Methods.fullSignature(param.getMethod()), param.getParameter().getName());
 	}
 
 }
