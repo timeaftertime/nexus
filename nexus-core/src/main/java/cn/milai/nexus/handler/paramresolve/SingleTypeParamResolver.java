@@ -5,7 +5,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import cn.milai.common.base.Classes;
-import cn.milai.nexus.handler.Msg;
+import cn.milai.nexus.handler.msg.Msg;
 import io.netty.channel.ChannelHandlerContext;
 
 /**

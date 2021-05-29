@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 
 import cn.milai.nexus.annotation.MsgControllerAdvice;
-import cn.milai.nexus.annotation.MsgExceptionHandler;
+import cn.milai.nexus.annotation.ExceptionHandler;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -27,17 +27,17 @@ public class ExtendsExceptionAdvice {
 	private AtomicInteger runtimeCount = new AtomicInteger();
 	private AtomicInteger exceptionCount = new AtomicInteger();
 
-	@MsgExceptionHandler(IllegalArgumentException.class)
+	@ExceptionHandler(IllegalArgumentException.class)
 	public void handleArgumentException(ChannelHandlerContext ctx, IllegalArgumentException e) {
 		argumentCount.incrementAndGet();
 	}
 
-	@MsgExceptionHandler(RuntimeException.class)
+	@ExceptionHandler(RuntimeException.class)
 	public void handleRuntimeException(ChannelHandlerContext ctx, RuntimeException e) {
 		runtimeCount.incrementAndGet();
 	}
 
-	@MsgExceptionHandler()
+	@ExceptionHandler()
 	public void handleException(ChannelHandlerContext ctx, Exception e) {
 		exceptionCount.incrementAndGet();
 	}

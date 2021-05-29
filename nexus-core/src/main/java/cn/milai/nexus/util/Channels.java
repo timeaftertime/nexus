@@ -11,13 +11,7 @@ import io.netty.util.AttributeKey;
  */
 public class Channels {
 
-	/**
-	 * 属性 [用户 id]
-	 */
-	public static final String ATTR_USER_ID = "userId";
-
-	private Channels() {
-	}
+	private Channels() {}
 
 	/**
 	 * 获取 {@link Channel} 指定 name 的 String 类型属性
@@ -26,7 +20,7 @@ public class Channels {
 	 * @return
 	 */
 	public static String stringAttr(Channel ch, String name) {
-		AttributeKey<String> key = AttributeKey.valueOf(ATTR_USER_ID);
+		AttributeKey<String> key = AttributeKey.valueOf(name);
 		return ch.attr(key).get();
 	}
 
@@ -37,8 +31,7 @@ public class Channels {
 	 * @return
 	 */
 	public static String stringAttr(ChannelHandlerContext ctx, String name) {
-		AttributeKey<String> key = AttributeKey.valueOf(ATTR_USER_ID);
-		return ctx.channel().attr(key).get();
+		return stringAttr(ctx.channel(), name);
 	}
 
 	/**
@@ -59,8 +52,7 @@ public class Channels {
 	 * @return
 	 */
 	public static Long longAttr(ChannelHandlerContext ctx, String name) {
-		AttributeKey<Long> key = AttributeKey.valueOf(name);
-		return ctx.channel().attr(key).get();
+		return longAttr(ctx.channel(), name);
 	}
 
 	/**

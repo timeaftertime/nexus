@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import cn.milai.nexus.handler.catcher.ExceptionCatcher;
 import cn.milai.nexus.handler.connection.OnlineHandler;
+import cn.milai.nexus.handler.msg.Msg;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

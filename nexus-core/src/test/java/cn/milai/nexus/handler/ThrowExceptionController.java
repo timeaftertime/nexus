@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 import cn.milai.nexus.annotation.MsgController;
 import cn.milai.nexus.annotation.MsgMapping;
+import cn.milai.nexus.handler.msg.SingleMsg;
 
 /**
  * 用于测试异常处理的配置类
@@ -41,7 +42,7 @@ public class ThrowExceptionController {
 	 */
 	public void dispathException(Class<? extends Exception> clazz) throws Exception {
 		msgDispatcher.dispatch(
-			null, Msg.of(THROW_MSG_CODE, PARAM_EXCEPTION_NAME, clazz.getName())
+			null, new SingleMsg(THROW_MSG_CODE, PARAM_EXCEPTION_NAME, clazz.getName())
 		);
 	}
 

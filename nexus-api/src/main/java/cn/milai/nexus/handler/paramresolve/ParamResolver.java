@@ -2,7 +2,7 @@ package cn.milai.nexus.handler.paramresolve;
 
 import org.springframework.core.MethodParameter;
 
-import cn.milai.nexus.handler.Msg;
+import cn.milai.nexus.handler.msg.Msg;
 import cn.milai.nexus.util.Methods;
 import io.netty.channel.ChannelHandlerContext;
 

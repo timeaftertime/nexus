@@ -10,10 +10,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>cn.milai.beginning</groupId>
-			<artifactId>beginning-base</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>cn.milai.nexus</groupId>
 			<artifactId>nexus-api</artifactId>
 		</dependency>

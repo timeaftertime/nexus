@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import org.springframework.stereotype.Component;
 
 /**
- * 使当前类中声明的 {@link MsgExceptionHandler} 生效 
+ * 使当前类中声明的 {@link ExceptionHandler} 生效 
  * @author milai
  * @date 2021.05.03
  */

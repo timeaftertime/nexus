@@ -2,9 +2,10 @@ package cn.milai.nexus.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -12,17 +13,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.stereotype.Component;
 
+import cn.milai.nexus.annotation.ExceptionHandler;
 import cn.milai.nexus.annotation.MsgController;
 import cn.milai.nexus.annotation.MsgControllerAdvice;
-import cn.milai.nexus.annotation.MsgExceptionHandler;
 import cn.milai.nexus.annotation.MsgMapping;
+import cn.milai.nexus.handler.msg.Msg;
+import cn.milai.nexus.handler.paramresolve.ExceptionParamResolver;
 import cn.milai.nexus.handler.paramresolve.ParamResolver;
 import cn.milai.nexus.handler.paramresolve.ParamResolverComposite;
-import cn.milai.nexus.handler.paramresolve.ExceptionParamResolver;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -35,7 +38,9 @@ public class MsgDispatcher implements ApplicationContextAware {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MsgDispatcher.class);
 
-	private ApplicationContext applicationContext;
+	private List<HandlerInterceptor> interceptors;
+
+	private Collection<ParamResolver> paramResolvers;
 
 	/**
 	 * 消息 code 及对应的处理方法的映射
@@ -43,32 +48,36 @@ public class MsgDispatcher implements ApplicationContextAware {
 	private Map<Integer, MethodHandler> handlerMapping = new HashMap<>();
 
 	/**
-	 * {@link MsgController} 内定义的 {@link Throwable} 即其处理器 {@link MethodHandler}
+	 * {@link MsgController} 内定义的 {@link ExceptionHandlerTable}
 	 */
-	private Map<Object, Map<Class<Exception>, MethodHandler>> exceptionHandlers = new HashMap<>();
+	private Map<Object, ExceptionHandlerTable> exceptionHandlerTable = new HashMap<>();
 
-	private Map<Class<Exception>, MethodHandler> globalExceptionHandlers = new HashMap<>();
+	private ExceptionHandlerTable globalExceptionHandlerTable = new ExceptionHandlerTable();
 
 	/**
 	 * 分发消息到对应的处理器处理
 	 * @param msg
 	 */
-	void dispatch(ChannelHandlerContext ctx, Msg msg) throws Exception {
+	public void dispatch(ChannelHandlerContext ctx, Msg msg) throws Exception {
 		LOG.info("接收到消息, msg = {}", msg);
 		MethodHandler handler = handlerMapping.get(msg.getCode());
 		if (handler == null) {
-			LOG.warn("没有找到对应的处理器， code = {}, handlers = {}", msg.getCode(), handlerMapping.keySet());
+			LOG.warn("没有找到对应的处理器: code = {}, handlers = {}", msg.getCode(), handlerMapping.keySet());
 			return;
 		}
-		ParamResolverComposite paramResolver = new ParamResolverComposite(
-			applicationContext.getBeansOfType(ParamResolver.class).values()
-		);
+		for (HandlerInterceptor interceptor : interceptors) {
+			if (!interceptor.preHandle(ctx, msg, handler)) {
+				LOG.debug("消息被拦截: id = {}, interceptor = {}", msg.getId(), interceptor.getClass().getName());
+				return;
+			}
+		}
+		ParamResolverComposite paramResolver = new ParamResolverComposite(paramResolvers);
 		Object[] params = paramResolver.resolveParams(handler.getHandleMethod(), ctx, msg);
 		try {
 			handler.invoke(params);
 		} catch (InvocationTargetException ex) {
 			Exception e = (Exception) ex.getTargetException();
-			LOG.error("处理消息时发生异常: msg = {}, e = {}", msg, ExceptionUtils.getStackFrames(e));
+			LOG.error("处理消息时发生异常: msg = {}, e = {}", msg, ExceptionUtils.getStackTrace(e));
 			MethodHandler exceptionHandler = findExceptionHandler(handler, e);
 			if (exceptionHandler == null) {
 				LOG.info("未找到对应的异常处理器: e = {}", e.getClass().getName());
@@ -80,32 +89,14 @@ public class MsgDispatcher implements ApplicationContextAware {
 	}
 
 	private MethodHandler findExceptionHandler(MethodHandler handler, Exception e) {
-		MethodHandler controllerExceptionHandler = findExceptionHandlerIn(
-			exceptionHandlers.getOrDefault(
-				handler.getHandler(), Collections.emptyMap()
-			), handler, e
-		);
-		if (controllerExceptionHandler != null) {
-			return controllerExceptionHandler;
-		}
-		return findExceptionHandlerIn(globalExceptionHandlers, controllerExceptionHandler, e);
-	}
-
-	private MethodHandler findExceptionHandlerIn(Map<Class<Exception>, MethodHandler> handlers, MethodHandler handler,
-		Exception e) {
-		Class<?> clazz = e.getClass();
-		while (clazz != Object.class) {
-			if (handlers.containsKey(clazz)) {
-				return handlers.get(clazz);
-			}
-			clazz = clazz.getSuperclass();
-		}
-		return null;
+		return exceptionHandlerTable.getOrDefault(handler.getHandler(), globalExceptionHandlerTable).findHandler(e);
 	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws HandlerRedeclareException {
-		this.applicationContext = applicationContext;
+		interceptors = new ArrayList<>(applicationContext.getBeansOfType(HandlerInterceptor.class).values());
+		AnnotationAwareOrderComparator.sort(interceptors);
+		paramResolvers = applicationContext.getBeansOfType(ParamResolver.class).values();
 		registerControllers(applicationContext.getBeansWithAnnotation(MsgController.class).values());
 		registerControllerAdvices(applicationContext.getBeansWithAnnotation(MsgControllerAdvice.class).values());
 	}
@@ -114,9 +105,7 @@ public class MsgDispatcher implements ApplicationContextAware {
 		for (Object controller : controllers) {
 			for (Method m : controller.getClass().getMethods()) {
 				parseMsgMapping(MergedAnnotations.from(m).get(MsgMapping.class), controller, m);
-				parseControllerExceptionHandler(
-					MergedAnnotations.from(m).get(MsgExceptionHandler.class), controller, m
-				);
+				parseExceptionHandler(MergedAnnotations.from(m).get(ExceptionHandler.class), controller, m);
 			}
 		}
 	}
@@ -124,7 +113,7 @@ public class MsgDispatcher implements ApplicationContextAware {
 	private void registerControllerAdvices(Collection<Object> advices) {
 		for (Object advice : advices) {
 			for (Method m : advice.getClass().getMethods()) {
-				parseGlobalExceptionHandler(MergedAnnotations.from(m).get(MsgExceptionHandler.class), advice, m);
+				parseGlobalExceptionHandler(MergedAnnotations.from(m).get(ExceptionHandler.class), advice, m);
 			}
 		}
 	}
@@ -144,36 +133,25 @@ public class MsgDispatcher implements ApplicationContextAware {
 		}
 	}
 
-	private void parseControllerExceptionHandler(MergedAnnotation<MsgExceptionHandler> annotation, Object h, Method m) {
-		parseExceptionHandler(exceptionHandlers.get(h), annotation, h, m);
-	}
-
-	private void parseGlobalExceptionHandler(MergedAnnotation<MsgExceptionHandler> annotation, Object advice,
-		Method m) {
-		parseExceptionHandler(globalExceptionHandlers, annotation, advice, m);
-	}
-
-	@SuppressWarnings("unchecked")
-	private void parseExceptionHandler(Map<Class<Exception>, MethodHandler> exceptionHandlers,
-		MergedAnnotation<MsgExceptionHandler> annotation, Object advice, Method method) {
-		if (!annotation.isPresent()) {
-			return;
-		}
-		registerThrowableHandler(
-			exceptionHandlers,
-			(Class<Exception>[]) annotation.getClassArray(MergedAnnotation.VALUE),
-			new MethodHandler(advice, method)
+	private void parseExceptionHandler(MergedAnnotation<ExceptionHandler> annotation, Object h, Method m) {
+		registerExceptionTable(
+			exceptionHandlerTable.computeIfAbsent(h, k -> new ExceptionHandlerTable(globalExceptionHandlerTable)),
+			annotation, new MethodHandler(h, m)
 		);
 	}
 
-	private void registerThrowableHandler(Map<Class<Exception>, MethodHandler> pres, Class<Exception>[] ex,
+	private void parseGlobalExceptionHandler(MergedAnnotation<ExceptionHandler> annotation, Object advice, Method m) {
+		registerExceptionTable(globalExceptionHandlerTable, annotation, new MethodHandler(advice, m));
+	}
+
+	@SuppressWarnings("unchecked")
+	private void registerExceptionTable(ExceptionHandlerTable table, MergedAnnotation<ExceptionHandler> annotation,
 		MethodHandler handler) {
-		for (Class<Exception> e : ex) {
-			MethodHandler pre = pres.get(e);
-			if (pre != null) {
-				throw new ExceptionRemappingException(e, pre.getHandleMethod(), handler.getHandleMethod());
-			}
-			pres.put(e, handler);
+		if (!annotation.isPresent()) {
+			return;
+		}
+		for (Class<Exception> e : (Class<Exception>[]) annotation.getClassArray(MergedAnnotation.VALUE)) {
+			table.register(e, handler);
 		}
 	}
 

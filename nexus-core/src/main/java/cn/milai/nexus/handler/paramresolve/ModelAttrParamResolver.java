@@ -12,7 +12,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import cn.milai.nexus.handler.Msg;
+import cn.milai.nexus.handler.msg.Msg;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -45,7 +45,7 @@ public class ModelAttrParamResolver extends AbstractParamResolver {
 				if (writeMethod == null) {
 					continue;
 				}
-				writeMethod.invoke(bean, msg.getData().getObject(pd.getName(), pd.getPropertyType()));
+				writeMethod.invoke(bean, msg.getData().get(pd.getName(), pd.getPropertyType()));
 			}
 			return bean;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException

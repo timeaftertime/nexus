@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface MsgExceptionHandler {
+public @interface ExceptionHandler {
 
 	/**
 	 * 处理的异常类型

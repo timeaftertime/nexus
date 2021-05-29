@@ -1,10 +1,14 @@
 package cn.milai.nexus.handler;
 
 import org.assertj.core.util.Arrays;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import cn.milai.nexus.NexusConfig;
 
@@ -13,8 +17,16 @@ import cn.milai.nexus.NexusConfig;
  * @author milai
  * @date 2021.05.04
  */
-@SpringBootTest(classes = { NexusConfig.class }, args = { ThrowExceptionController.ENABLE_ARG })
+@RunWith(SpringRunner.class)
+@SpringBootTest(
+	classes = { NoMappingExceptionHandleTest.TestConfiguration.class }, args = { ThrowExceptionController.ENABLE_ARG }
+)
 public class NoMappingExceptionHandleTest {
+
+	@Configuration
+	@Import(NexusConfig.class)
+	static class TestConfiguration {
+	}
 
 	@Autowired
 	private ThrowExceptionController throwExceptionController;

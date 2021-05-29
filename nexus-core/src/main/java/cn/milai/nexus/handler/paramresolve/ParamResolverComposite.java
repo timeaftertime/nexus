@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
-import cn.milai.nexus.handler.Msg;
+import cn.milai.nexus.handler.msg.Msg;
 import io.netty.channel.ChannelHandlerContext;
 
 /**

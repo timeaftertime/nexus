@@ -7,13 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import cn.milai.nexus.NexusConfig;
-import cn.milai.nexus.handler.Msg;
+import cn.milai.nexus.handler.msg.Msg;
+import cn.milai.nexus.handler.msg.SingleMsg;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -21,6 +24,7 @@ import io.netty.channel.ChannelHandlerContext;
  * @author milai
  * @date 2021.05.04
  */
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { NexusConfig.class })
 public class DefaultParamResolversTest {
 
@@ -32,7 +36,7 @@ public class DefaultParamResolversTest {
 		ParamResolverComposite paramResolver = new ParamResolverComposite(paramResolvers);
 		ChannelHandlerContext ctx = Mockito.mock(ChannelHandlerContext.class);
 		int age = 10;
-		Msg msg = Msg.of(0, "age", age);
+		Msg msg = new SingleMsg(0, "age", age);
 		assertArrayEquals(new Object[] { ctx }, paramResolver.resolveParams(contextMethod(), ctx, msg));
 		assertArrayEquals(new Object[] { age }, paramResolver.resolveParams(intMethod(), ctx, msg));
 		Object[] params = paramResolver.resolveParams(modelMethod(), ctx, msg);

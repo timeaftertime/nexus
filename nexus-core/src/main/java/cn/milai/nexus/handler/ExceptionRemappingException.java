@@ -14,7 +14,7 @@ public class ExceptionRemappingException extends HandlerRedeclareException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public ExceptionRemappingException(Class<Exception> t, Method pre, Method now) {
+	public ExceptionRemappingException(Class<? extends Exception> t, Method pre, Method now) {
 		super("异常处理器[throwable = " + t.getName() + "]", pre, now);
 	}
 
