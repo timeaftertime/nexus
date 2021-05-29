@@ -22,6 +22,7 @@ import cn.milai.nexus.annotation.ExceptionHandler;
 import cn.milai.nexus.annotation.MsgController;
 import cn.milai.nexus.annotation.MsgControllerAdvice;
 import cn.milai.nexus.annotation.MsgMapping;
+import cn.milai.nexus.handler.interceptor.Interceptor;
 import cn.milai.nexus.handler.msg.Msg;
 import cn.milai.nexus.handler.paramresolve.ExceptionParamResolver;
 import cn.milai.nexus.handler.paramresolve.ParamResolver;
@@ -38,7 +39,7 @@ public class MsgDispatcher implements ApplicationContextAware {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MsgDispatcher.class);
 
-	private List<HandlerInterceptor> interceptors;
+	private List<Interceptor> interceptors;
 
 	private Collection<ParamResolver> paramResolvers;
 
@@ -65,7 +66,7 @@ public class MsgDispatcher implements ApplicationContextAware {
 			LOG.warn("没有找到对应的处理器: code = {}, handlers = {}", msg.getCode(), handlerMapping.keySet());
 			return;
 		}
-		for (HandlerInterceptor interceptor : interceptors) {
+		for (Interceptor interceptor : interceptors) {
 			if (!interceptor.preHandle(ctx, msg, handler)) {
 				LOG.debug("消息被拦截: id = {}, interceptor = {}", msg.getId(), interceptor.getClass().getName());
 				return;
@@ -94,7 +95,7 @@ public class MsgDispatcher implements ApplicationContextAware {
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws HandlerRedeclareException {
-		interceptors = new ArrayList<>(applicationContext.getBeansOfType(HandlerInterceptor.class).values());
+		interceptors = new ArrayList<>(applicationContext.getBeansOfType(Interceptor.class).values());
 		AnnotationAwareOrderComparator.sort(interceptors);
 		paramResolvers = applicationContext.getBeansOfType(ParamResolver.class).values();
 		registerControllers(applicationContext.getBeansWithAnnotation(MsgController.class).values());

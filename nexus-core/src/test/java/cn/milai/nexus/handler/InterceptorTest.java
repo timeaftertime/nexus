@@ -10,6 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import cn.milai.nexus.NexusConfig;
 import cn.milai.nexus.NexusException;
+import cn.milai.nexus.handler.interceptor.InterceptAllInterceptor;
 
 /**
  * 测试拦截器
@@ -18,10 +19,10 @@ import cn.milai.nexus.NexusException;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(
-	classes = HandlerInterceptorTest.TestConfiguration.class,
+	classes = InterceptorTest.TestConfiguration.class,
 	args = { ThrowExceptionController.ENABLE_ARG, InterceptAllInterceptor.ENABLE_ARG }
 )
-public class HandlerInterceptorTest {
+public class InterceptorTest {
 
 	@Configuration
 	@Import(NexusConfig.class)

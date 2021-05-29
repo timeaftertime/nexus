@@ -44,6 +44,7 @@ public class DefaultParamResolversTest {
 		Model model = (Model) params[0];
 		assertEquals(age, model.age);
 		assertNull(model.name);
+		assertArrayEquals(new Object[] { msg }, paramResolver.resolveParams(msgMethod(), ctx, msg));
 	}
 
 	public static class Model {
@@ -77,10 +78,18 @@ public class DefaultParamResolversTest {
 		);
 	}
 
+	private Method msgMethod() throws NoSuchMethodException, SecurityException {
+		return DefaultParamResolversTest.class.getDeclaredMethod(
+			"needMsg", Msg.class
+		);
+	}
+
 	void needContext(ChannelHandlerContext ctx) {}
 
 	void needInt(int age) {}
 
 	void needModel(Model model) {}
+
+	void needMsg(Msg msg) {}
 
 }

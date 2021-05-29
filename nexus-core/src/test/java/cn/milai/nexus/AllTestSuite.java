@@ -5,11 +5,10 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import cn.milai.nexus.handler.HandlerTestSuite;
-import cn.milai.nexus.handler.paramresolve.DefaultParamResolversTest;
 
 @RunWith(Suite.class)
 @SuiteClasses(
-	{ HandlerTestSuite.class, DefaultParamResolversTest.class }
+	{ HandlerTestSuite.class }
 )
 public class AllTestSuite {
 

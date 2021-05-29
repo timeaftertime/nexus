@@ -1,5 +1,7 @@
 package cn.milai.nexus.handler.msg;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * {@link Msg} 默认实现
  * @author milai
@@ -37,6 +39,23 @@ public class BaseMsg implements Msg {
 	 */
 	public BaseMsg(int code, String data) {
 		this(Msg.generateId(), code, System.currentTimeMillis() / 1000, data);
+	}
+
+	/**
+	 * 以自动生成 id 和时间、指定对象的 JSON 字符串创建一个 {@link BaseMsg}
+	 * @param code
+	 * @param data
+	 */
+	public BaseMsg(int code, Object data) {
+		this(code, JSONObject.toJSONString(data));
+	}
+
+	/**
+	 * 以自动生成 id 和时间、空参数创建一个 {@link BaseMsg}
+	 * @param code
+	 */
+	public BaseMsg(int code) {
+		this(code, "{}");
 	}
 
 	@Override
