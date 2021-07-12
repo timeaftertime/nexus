@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cn.milai.nexus</groupId>
 	<artifactId>nexus-parent</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4</version>
 	<packaging>pom</packaging>
 	<name>nexus</name>
 	<description>基于 SpringBoot 、 Netty 的 Socket 客户端与服务端框架</description>
@@ -15,8 +15,8 @@
 	</parent>
 
 	<properties>
-		<beginning.version>0.0.3-SNAPSHOT</beginning.version>
-		<nexus.version>0.0.3-SNAPSHOT</nexus.version>
+		<beginning.version>0.0.4</beginning.version>
+		<nexus.version>0.0.4</nexus.version>
 		<protobuf.version>3.14.0</protobuf.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
