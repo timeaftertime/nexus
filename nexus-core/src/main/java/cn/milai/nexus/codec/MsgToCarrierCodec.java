@@ -28,14 +28,14 @@ public class MsgToCarrierCodec extends MessageToMessageCodec<MsgCarrier, Msg> {
 				.setId(msg.getId())
 				.setCode(msg.getCode())
 				.setTime(msg.getTime())
-				.setData(msg.getData().toJSONString())
+				.setData(msg.getData().toString())
 				.build()
 		);
 	}
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, MsgCarrier msg, List<Object> out) throws Exception {
-		Msg m = new BaseMsg(msg.getId(), msg.getCode(), msg.getTime(), msg.getData());
+		Msg m = new BaseMsg(msg.getId(), msg.getCode(), msg.getData());
 		out.add(m);
 		LOG.debug("完成解码 Msg 消息, ctx = {}, msg = {}", ctx, m);
 	}

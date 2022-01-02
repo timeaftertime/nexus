@@ -1,8 +1,5 @@
 package cn.milai.nexus.handler.msg;
 
-import cn.milai.common.base.Digests;
-import cn.milai.common.base.Randoms;
-
 /**
  * 消息
  * @author milai
@@ -11,12 +8,7 @@ import cn.milai.common.base.Randoms;
 public interface Msg {
 
 	/**
-	 * {@link #getId()} 长度
-	 */
-	int ID_LENGTH = 32;
-
-	/**
-	 * 获取消息唯一标识，长度为 {@link #ID_LENGTH} 的字符串
+	 * 获取消息唯一标识
 	 * @return
 	 */
 	String getId();
@@ -39,11 +31,4 @@ public interface Msg {
 	 */
 	MsgMap getData();
 
-	/**
-	 * 构造一个唯一 id
-	 * @return
-	 */
-	static String generateId() {
-		return Digests.sha256(System.nanoTime() + Randoms.fixedLowerDigit(8)).substring(0, ID_LENGTH);
-	}
 }

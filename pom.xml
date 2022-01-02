@@ -101,6 +101,11 @@
 				<artifactId>logback-classic</artifactId>
 				<version>1.2.3</version>
 			</dependency>
+			<dependency>
+				<groupId>cn.milai.beginning</groupId>
+				<artifactId>beginning-api</artifactId>
+				<version>${beginning.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

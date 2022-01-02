@@ -45,7 +45,7 @@ public class ModelAttrParamResolver extends AbstractParamResolver {
 				if (writeMethod == null) {
 					continue;
 				}
-				writeMethod.invoke(bean, msg.getData().get(pd.getName(), pd.getPropertyType()));
+				writeMethod.invoke(bean, msg.getData().as(pd.getName(), pd.getPropertyType()));
 			}
 			return bean;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException

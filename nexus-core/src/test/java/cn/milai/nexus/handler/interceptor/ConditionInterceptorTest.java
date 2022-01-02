@@ -22,7 +22,7 @@ public class ConditionInterceptorTest {
 
 	@Test
 	public void testConditionInterceptor() {
-		String id = Msg.generateId();
+		String id = new BaseMsg(0).getId();
 		Interceptor interceptor1 = new ConditionInterceptor(m -> m.getId().equals(id));
 		Interceptor interceptor2 = new ConditionInterceptor(m -> m.getId().equals(id)) {
 			protected boolean doPreHandle(ChannelHandlerContext ctx, Msg msg, Object handler) {
@@ -54,7 +54,7 @@ public class ConditionInterceptorTest {
 	}
 
 	private Msg specifyIdMsg(String id) {
-		return new BaseMsg(id, 0, 0, "{}");
+		return new BaseMsg(id, 0, "{}");
 	}
 
 }

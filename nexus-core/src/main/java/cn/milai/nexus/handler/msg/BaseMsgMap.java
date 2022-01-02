@@ -1,7 +1,8 @@
 package cn.milai.nexus.handler.msg;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import cn.milai.common.api.data.JSON;
 
 /**
  * MsgMap 默认实现
@@ -10,98 +11,70 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class BaseMsgMap implements MsgMap {
 
-	private JSONObject json;
+	private JsonNode json;
 
-	public BaseMsgMap(JSONObject json) {
+	public BaseMsgMap(JsonNode json) {
 		this.json = json;
 	}
 
 	public BaseMsgMap(String jsonString) {
-		this.json = JSON.parseObject(jsonString);
+		this.json = JSON.readTree(jsonString);
 	}
 
 	@Override
-	public MsgMap getMap(String key) {
-		return new BaseMsgMap(json.getJSONObject(key));
+	public MsgMap asMap(String key) {
+		JsonNode node = json.get(key);
+		if (node.isMissingNode() || !node.isObject()) {
+			return null;
+		}
+		return new BaseMsgMap(node);
 	}
 
 	@Override
-	public MsgList getList(String key) {
-		return new BaseMsgList(json.getJSONArray(key));
+	public MsgList asList(String key) {
+		JsonNode node = json.get(key);
+		if (node.isMissingNode() || !node.isArray()) {
+			return null;
+		}
+		return new BaseMsgList(node);
 	}
 
 	@Override
-	public Boolean getBoolean(String key) {
-		return json.getBoolean(key);
+	public boolean asBool(String key) {
+		return json.get(key).asBoolean();
 	}
 
 	@Override
-	public boolean getBooleanValue(String key) {
-		return json.getBooleanValue(key);
+	public int asInt(String key) {
+		return json.get(key).asInt();
 	}
 
 	@Override
-	public byte[] getBytes(String key) {
-		return json.getBytes(key);
+	public long asLong(String key) {
+		return json.get(key).asLong();
+	}
+	
+	@Override
+	public double asDouble(String key) {
+		return json.get(key).asDouble();
 	}
 
 	@Override
-	public Integer getInteger(String key) {
-		return json.getInteger(key);
+	public String asString(String key) {
+		JsonNode node = json.get(key);
+		if (node == null || node.isNull()) {
+			return "";
+		}
+		return node.asText();
 	}
 
 	@Override
-	public int getIntValue(String key) {
-		return json.getIntValue(key);
-	}
-
-	@Override
-	public Long getLong(String key) {
-		return json.getLong(key);
-	}
-
-	@Override
-	public long getLongValue(String key) {
-		return json.getLongValue(key);
-	}
-
-	@Override
-	public Float getFloat(String key) {
-		return json.getFloat(key);
-	}
-
-	@Override
-	public float getFloatValue(String key) {
-		return json.getFloatValue(key);
-	}
-
-	@Override
-	public Double getDouble(String key) {
-		return json.getDouble(key);
-	}
-
-	@Override
-	public double getDoubleValue(String key) {
-		return json.getDoubleValue(key);
-	}
-
-	@Override
-	public String getString(String key) {
-		return json.getString(key);
-	}
-
-	@Override
-	public <T> T get(String key, Class<T> clazz) {
-		return json.getObject(key, clazz);
-	}
-
-	@Override
-	public String toJSONString() {
-		return json.toJSONString();
+	public <T> T as(String key, Class<T> clazz) {
+		return JSON.read(json.get(key), clazz);
 	}
 
 	@Override
 	public String toString() {
-		return toJSONString();
+		return json.toString();
 	}
 }

@@ -10,12 +10,12 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>cn.milai.nexus</groupId>
-			<artifactId>nexus-api</artifactId>
+			<groupId>cn.milai.beginning</groupId>
+			<artifactId>beginning-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>fastjson</artifactId>
+			<groupId>cn.milai.nexus</groupId>
+			<artifactId>nexus-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

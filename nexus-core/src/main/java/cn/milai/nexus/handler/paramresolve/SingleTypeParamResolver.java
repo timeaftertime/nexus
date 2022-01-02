@@ -27,22 +27,22 @@ public class SingleTypeParamResolver extends AbstractParamResolver {
 		Class<?> c = param.getParameterType();
 		String paramName = param.getParameter().getName();
 		if (Classes.isInts(c)) {
-			return msg.getData().getInteger(paramName);
+			return msg.getData().asInt(paramName);
 		}
 		if (Classes.isLong(c)) {
-			return msg.getData().getLong(paramName);
+			return msg.getData().asLong(paramName);
 		}
 		if (Classes.isBools(c)) {
-			return msg.getData().getBoolean(paramName);
+			return msg.getData().asBool(paramName);
 		}
 		if (Classes.isFloats(c)) {
-			return msg.getData().getFloat(paramName);
+			return (float) msg.getData().asDouble(paramName);
 		}
 		if (Classes.isDoubles(c)) {
-			return msg.getData().getDouble(paramName);
+			return msg.getData().asDouble(paramName);
 		}
 		if (c == String.class) {
-			return msg.getData().getString(paramName);
+			return msg.getData().asString(paramName);
 		}
 		throw new UnresolveableParamException(ParamResolver.paramSignature(param));
 	}

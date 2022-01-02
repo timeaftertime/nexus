@@ -1,6 +1,7 @@
 package cn.milai.nexus.handler.msg;
 
-import com.alibaba.fastjson.JSONObject;
+import cn.milai.common.api.data.JSON;
+import cn.milai.common.api.generator.TimeRandomIdGenerator;
 
 /**
  * {@link Msg} 默认实现
@@ -9,11 +10,11 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class BaseMsg implements Msg {
 
+	private static final TimeRandomIdGenerator ID_GENERATOR = new TimeRandomIdGenerator();
+
 	private String id;
 
 	private int code;
-
-	private long time;
 
 	private MsgMap data;
 
@@ -21,24 +22,12 @@ public class BaseMsg implements Msg {
 	 * 以指定 id 和参数创建一个 {@link BaseMsg}
 	 * @param id 指定生成的消息 id
 	 * @param code
-	 * @param time
 	 * @param data 消息体的 map JSON 字符串
 	 */
-	public BaseMsg(String id, int code, long time, String data) {
+	public BaseMsg(String id, int code, String data) {
 		this.id = id;
 		this.code = code;
-		this.time = time;
 		this.data = new BaseMsgMap(data);
-	}
-
-	/**
-	 * 以自动生成 id 和时间、指定参数创建一个 {@link BaseMsg}
-	 * @param code
-	 * @param time
-	 * @param data
-	 */
-	public BaseMsg(int code, String data) {
-		this(Msg.generateId(), code, System.currentTimeMillis() / 1000, data);
 	}
 
 	/**
@@ -47,7 +36,16 @@ public class BaseMsg implements Msg {
 	 * @param data
 	 */
 	public BaseMsg(int code, Object data) {
-		this(code, JSONObject.toJSONString(data));
+		this(ID_GENERATOR.next(), code, JSON.write(data));
+	}
+
+	/**
+	 * 以自动生成 id 、时间和指定  JSON 字符串创建一个 {@link BaseMsg}
+	 * @param code
+	 * @param jsonData
+	 */
+	public BaseMsg(int code, String jsonData) {
+		this(ID_GENERATOR.next(), code, jsonData);
 	}
 
 	/**
@@ -55,7 +53,7 @@ public class BaseMsg implements Msg {
 	 * @param code
 	 */
 	public BaseMsg(int code) {
-		this(code, "{}");
+		this(ID_GENERATOR.next(), code, "{}");
 	}
 
 	@Override
@@ -65,14 +63,14 @@ public class BaseMsg implements Msg {
 	public int getCode() { return code; }
 
 	@Override
-	public long getTime() { return time; }
+	public long getTime() { return TimeRandomIdGenerator.getTime(id); }
 
 	@Override
 	public MsgMap getData() { return data; }
 
 	@Override
 	public String toString() {
-		return "BaseMsg [id=" + id + ", code=" + code + ", time=" + time + ", data=" + data + "]";
+		return "BaseMsg [id=" + id + ", code=" + code + ", data=" + data + ", time=" + getTime() + "]";
 	}
 
 }
