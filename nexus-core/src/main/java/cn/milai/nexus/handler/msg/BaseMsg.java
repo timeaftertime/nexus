@@ -1,7 +1,7 @@
 package cn.milai.nexus.handler.msg;
 
-import cn.milai.common.api.data.JSON;
-import cn.milai.common.api.generator.TimeRandomIdGenerator;
+import cn.milai.common.uniform.generator.TimeRandomIdGenerator;
+import cn.milai.common.uniform.serialize.JSON;
 
 /**
  * {@link Msg} 默认实现

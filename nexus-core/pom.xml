@@ -11,7 +11,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>cn.milai.beginning</groupId>
-			<artifactId>beginning-api</artifactId>
+			<artifactId>beginning-uniform</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>cn.milai.nexus</groupId>

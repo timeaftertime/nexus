@@ -2,7 +2,7 @@ package cn.milai.nexus.handler.msg;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import cn.milai.common.api.data.JSON;
+import cn.milai.common.uniform.serialize.JSON;
 
 /**
  * {@link MsgList} 默认实现

@@ -1,6 +1,6 @@
 package cn.milai.nexus.handler.msg;
 
-import cn.milai.common.api.data.JSON;
+import cn.milai.common.uniform.serialize.JSON;
 
 /**
  * 只带一个消息体参数的 {@link Msg}

@@ -2,7 +2,7 @@ package cn.milai.nexus.handler.msg;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import cn.milai.common.api.data.JSON;
+import cn.milai.common.uniform.serialize.JSON;
 
 /**
  * MsgMap 默认实现
@@ -53,7 +53,7 @@ public class BaseMsgMap implements MsgMap {
 	public long asLong(String key) {
 		return json.get(key).asLong();
 	}
-	
+
 	@Override
 	public double asDouble(String key) {
 		return json.get(key).asDouble();

@@ -83,7 +83,7 @@
 			</dependency>
 			<dependency>
 				<groupId>cn.milai.beginning</groupId>
-				<artifactId>beginning-base</artifactId>
+				<artifactId>beginning-util</artifactId>
 				<version>${beginning.version}</version>
 			</dependency>
 			<dependency>
@@ -103,7 +103,7 @@
 			</dependency>
 			<dependency>
 				<groupId>cn.milai.beginning</groupId>
-				<artifactId>beginning-api</artifactId>
+				<artifactId>beginning-uniform</artifactId>
 				<version>${beginning.version}</version>
 			</dependency>
 		</dependencies>

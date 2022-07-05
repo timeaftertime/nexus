@@ -11,7 +11,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>cn.milai.beginning</groupId>
-			<artifactId>beginning-base</artifactId>
+			<artifactId>beginning-util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
